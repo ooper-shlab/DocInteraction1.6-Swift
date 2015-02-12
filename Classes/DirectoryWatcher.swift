@@ -102,7 +102,7 @@ class DirectoryWatcher: NSObject {
     
     func invalidate() {
         if dirKQRef != nil {
-            dispatch_source_cancel(dirKQRef)
+            dispatch_source_cancel(dirKQRef!)
             dirKQRef = nil
             // We don't need to close the kq, CFFileDescriptorInvalidate closed it instead.
             // Change the value so no one thinks it's still live.

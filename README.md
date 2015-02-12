@@ -2,6 +2,8 @@
 
 Translated by OOPer in cooperation with shlab.jp, on 2015/1/17.
 
+Adapted to Swift 1.2 reuquirements on 2015/2/13.
+
 Based on
 <https://developer.apple.com/library/ios/samplecode/DocInteraction/Introduction/Intro.html#//apple_ref/doc/uid/DTS40010052>
 2014-06-17.

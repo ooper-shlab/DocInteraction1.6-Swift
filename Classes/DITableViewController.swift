@@ -157,7 +157,7 @@ UIDocumentInteractionControllerDelegate {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellIdentifier = "cellID"
-        var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as UITableViewCell?
+        var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as! UITableViewCell?
         
         if cell == nil {
             cell = UITableViewCell(style: .Subtitle, reuseIdentifier: cellIdentifier)
@@ -184,7 +184,7 @@ UIDocumentInteractionControllerDelegate {
         
         let fileURLString = self.docInteractionController.URL.path!
         let fileAttributes = NSFileManager.defaultManager().attributesOfItemAtPath(fileURLString, error: nil)!
-        let fileSize = (fileAttributes[NSFileSize] as NSNumber).longLongValue
+        let fileSize = (fileAttributes[NSFileSize] as! NSNumber).longLongValue
         let fileSizeStr = NSByteCountFormatter.stringFromByteCount(fileSize,
             
             countStyle: NSByteCountFormatterCountStyle.File)
@@ -294,7 +294,7 @@ UIDocumentInteractionControllerDelegate {
     //MARK: - File system support
     
     private var applicationDocumentsDirectory: String {
-        return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).last! as String
+        return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).last! as! String
     }
     
     func directoryDidChange(folderWatcher: DirectoryWatcher) {
@@ -304,7 +304,7 @@ UIDocumentInteractionControllerDelegate {
         
         let documentsDirectoryContents = NSFileManager.defaultManager().contentsOfDirectoryAtPath(documentsDirectoryPath, error: nil)
         
-        for curFileName in documentsDirectoryContents! as [String] {
+        for curFileName in documentsDirectoryContents! as! [String] {
             let filePath = documentsDirectoryPath.stringByAppendingPathComponent(curFileName)
             let fileURL = NSURL(fileURLWithPath: filePath)!
             

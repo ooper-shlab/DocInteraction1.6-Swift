@@ -17,7 +17,6 @@
 		530DD26B121C90A800B86A96 /* Image Document.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 530DD267121C90A800B86A96 /* Image Document.jpg */; };
 		530DD26C121C90A800B86A96 /* PDF Document.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 530DD268121C90A800B86A96 /* PDF Document.pdf */; };
 		530DD26D121C90A800B86A96 /* Text Document.txt in Resources */ = {isa = PBXBuildFile; fileRef = 530DD269121C90A800B86A96 /* Text Document.txt */; };
-		D76D9C491A7661CF003276E8 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = D76D9C481A7661CF003276E8 /* README.md */; };
 		D7E2C50A1A69FB59003BB161 /* DirectoryWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E2C5091A69FB59003BB161 /* DirectoryWatcher.swift */; };
 		D7E2C50C1A6A1345003BB161 /* DITableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E2C50B1A6A1345003BB161 /* DITableViewController.swift */; };
 		D7E2C50E1A6A265A003BB161 /* DocInteractionAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E2C50D1A6A265A003BB161 /* DocInteractionAppDelegate.swift */; };
@@ -199,7 +198,6 @@
 			files = (
 				D7E2C50E1A6A265A003BB161 /* DocInteractionAppDelegate.swift in Sources */,
 				D7E2C50A1A69FB59003BB161 /* DirectoryWatcher.swift in Sources */,
-				D76D9C491A7661CF003276E8 /* README.md in Sources */,
 				D7E2C50C1A6A1345003BB161 /* DITableViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -59,7 +59,7 @@ import UIKit
 @objc(DocInteractionAppDelegate)
 class DocInteractionAppDelegate: NSObject, UIApplicationDelegate {
     
-    var window: UIWindow!
+    var window: UIWindow?
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) -> Bool {
         // override point for customization after application launch.
