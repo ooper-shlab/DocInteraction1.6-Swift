@@ -17,6 +17,7 @@
 		530DD26B121C90A800B86A96 /* Image Document.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 530DD267121C90A800B86A96 /* Image Document.jpg */; };
 		530DD26C121C90A800B86A96 /* PDF Document.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 530DD268121C90A800B86A96 /* PDF Document.pdf */; };
 		530DD26D121C90A800B86A96 /* Text Document.txt in Resources */ = {isa = PBXBuildFile; fileRef = 530DD269121C90A800B86A96 /* Text Document.txt */; };
+		D7B140E61B4063DF006CE73E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D7B140E41B4063DF006CE73E /* LaunchScreen.storyboard */; };
 		D7E2C50A1A69FB59003BB161 /* DirectoryWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E2C5091A69FB59003BB161 /* DirectoryWatcher.swift */; };
 		D7E2C50C1A6A1345003BB161 /* DITableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E2C50B1A6A1345003BB161 /* DITableViewController.swift */; };
 		D7E2C50E1A6A265A003BB161 /* DocInteractionAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E2C50D1A6A265A003BB161 /* DocInteractionAppDelegate.swift */; };
@@ -37,6 +38,7 @@
 		537472A7121C86F4003867AC /* ReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* DocInteraction-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "DocInteraction-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		D76D9C481A7661CF003276E8 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		D7B140E51B4063DF006CE73E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D7E2C5091A69FB59003BB161 /* DirectoryWatcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DirectoryWatcher.swift; sourceTree = "<group>"; };
 		D7E2C50B1A6A1345003BB161 /* DITableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DITableViewController.swift; sourceTree = "<group>"; };
 		D7E2C50D1A6A265A003BB161 /* DocInteractionAppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocInteractionAppDelegate.swift; sourceTree = "<group>"; };
@@ -93,6 +95,7 @@
 			children = (
 				8D1107310486CEB800E47090 /* DocInteraction-Info.plist */,
 				1ED058B9193798EE000B2A39 /* Main.storyboard */,
+				D7B140E41B4063DF006CE73E /* LaunchScreen.storyboard */,
 				1ED058B719379755000B2A39 /* Images.xcassets */,
 				530DD265121C90A800B86A96 /* SampleDocs */,
 			);
@@ -147,7 +150,8 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = Z7P62XVNWC;
@@ -184,6 +188,7 @@
 				530DD26A121C90A800B86A96 /* HTML Document.html in Resources */,
 				530DD26B121C90A800B86A96 /* Image Document.jpg in Resources */,
 				1ED058BB193798EE000B2A39 /* Main.storyboard in Resources */,
+				D7B140E61B4063DF006CE73E /* LaunchScreen.storyboard in Resources */,
 				530DD26C121C90A800B86A96 /* PDF Document.pdf in Resources */,
 				530DD26D121C90A800B86A96 /* Text Document.txt in Resources */,
 			);
@@ -213,6 +218,14 @@
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
+		D7B140E41B4063DF006CE73E /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D7B140E51B4063DF006CE73E /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -234,6 +247,7 @@
 				INFOPLIST_FILE = "DocInteraction-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourcompany.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = DocInteraction;
 				PROVISIONING_PROFILE = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -256,6 +270,7 @@
 				INFOPLIST_FILE = "DocInteraction-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourcompany.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = DocInteraction;
 				PROVISIONING_PROFILE = "";
 				VALIDATE_PRODUCT = YES;
@@ -266,6 +281,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

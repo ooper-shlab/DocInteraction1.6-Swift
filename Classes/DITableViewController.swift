@@ -114,7 +114,7 @@ UIDocumentInteractionControllerDelegate {
             var fileURL: NSURL
             if cellIndexPath.section == 0 {
                 // for section 0, we preview the docs built into our app
-                fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[cellIndexPath.row], ofType: nil)!)!
+                fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[cellIndexPath.row], ofType: nil)!)
             } else {
                 // for secton 1, we preview the docs found in the Documents folder
                 fileURL = self.documentURLs[cellIndexPath.row]
@@ -157,7 +157,7 @@ UIDocumentInteractionControllerDelegate {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellIdentifier = "cellID"
-        var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as! UITableViewCell?
+        var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as UITableViewCell?
         
         if cell == nil {
             cell = UITableViewCell(style: .Subtitle, reuseIdentifier: cellIdentifier)
@@ -168,7 +168,7 @@ UIDocumentInteractionControllerDelegate {
         
         if indexPath.section == 0 {
             // first section is our build-in documents
-            fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[indexPath.row], ofType: nil)!)!
+            fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[indexPath.row], ofType: nil)!)
         } else {
             // second section is the contents of the Documents folder
             fileURL = self.documentURLs[indexPath.row]
@@ -177,13 +177,13 @@ UIDocumentInteractionControllerDelegate {
         
         // layout the cell
         cell!.textLabel?.text = fileURL.path!.lastPathComponent
-        var iconCount = self.docInteractionController.icons.count
+        let iconCount = self.docInteractionController.icons.count
         if iconCount > 0 {
-            cell!.imageView?.image = self.docInteractionController.icons[iconCount - 1] as? UIImage
+            cell!.imageView?.image = self.docInteractionController.icons[iconCount - 1]
         }
         
-        let fileURLString = self.docInteractionController.URL.path!
-        let fileAttributes = NSFileManager.defaultManager().attributesOfItemAtPath(fileURLString, error: nil)!
+        let fileURLString = self.docInteractionController.URL!.path!
+        let fileAttributes = try! NSFileManager.defaultManager().attributesOfItemAtPath(fileURLString)
         let fileSize = (fileAttributes[NSFileSize] as! NSNumber).longLongValue
         let fileSizeStr = NSByteCountFormatter.stringFromByteCount(fileSize,
             
@@ -259,10 +259,10 @@ UIDocumentInteractionControllerDelegate {
     //MARK: - QLPreviewControllerDataSource
     
     // Returns the number of items that the preview controller should preview
-    func numberOfPreviewItemsInPreviewController(controller: QLPreviewController!) -> Int {
+    func numberOfPreviewItemsInPreviewController(controller: QLPreviewController) -> Int {
         var numToPreview = 0
         
-        let selectedIndexPath = self.tableView.indexPathForSelectedRow()
+        let selectedIndexPath = self.tableView.indexPathForSelectedRow
         if (selectedIndexPath?.section ?? 0) == 0 {
             numToPreview = documents.count
         } else {
@@ -272,17 +272,17 @@ UIDocumentInteractionControllerDelegate {
         return numToPreview
     }
     
-    func previewControllerDidDismiss(controller: QLPreviewController!) {
+    func previewControllerDidDismiss(controller: QLPreviewController) {
         // if the preview dismissed (done button touched), use this method to post-process previews
     }
     
     // returns the item that the preview controller should preview
-    func previewController(controller: QLPreviewController!, previewItemAtIndex idx: Int) -> QLPreviewItem! {
+    func previewController(controller: QLPreviewController, previewItemAtIndex idx: Int) -> QLPreviewItem {
         var fileURL: NSURL
         
-        let selectedIndexPath = self.tableView.indexPathForSelectedRow()
+        let selectedIndexPath = self.tableView.indexPathForSelectedRow
         if (selectedIndexPath?.section ?? 0) == 0 {
-            fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[idx], ofType: nil)!)!
+            fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[idx], ofType: nil)!)
         } else {
             fileURL = self.documentURLs[idx]
         }
@@ -294,7 +294,7 @@ UIDocumentInteractionControllerDelegate {
     //MARK: - File system support
     
     private var applicationDocumentsDirectory: String {
-        return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).last! as! String
+        return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).last! as String
     }
     
     func directoryDidChange(folderWatcher: DirectoryWatcher) {
@@ -302,11 +302,16 @@ UIDocumentInteractionControllerDelegate {
         
         let documentsDirectoryPath = self.applicationDocumentsDirectory
         
-        let documentsDirectoryContents = NSFileManager.defaultManager().contentsOfDirectoryAtPath(documentsDirectoryPath, error: nil)
+        let documentsDirectoryContents: [AnyObject]?
+        do {
+            documentsDirectoryContents = try NSFileManager.defaultManager().contentsOfDirectoryAtPath(documentsDirectoryPath)
+        } catch _ {
+            documentsDirectoryContents = nil
+        }
         
         for curFileName in documentsDirectoryContents! as! [String] {
             let filePath = documentsDirectoryPath.stringByAppendingPathComponent(curFileName)
-            let fileURL = NSURL(fileURLWithPath: filePath)!
+            let fileURL = NSURL(fileURLWithPath: filePath)
             
             var isDirectory: ObjCBool = false
             NSFileManager.defaultManager().fileExistsAtPath(filePath, isDirectory: &isDirectory)
