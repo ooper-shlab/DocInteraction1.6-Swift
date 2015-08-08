@@ -176,7 +176,7 @@ UIDocumentInteractionControllerDelegate {
         self.setupDocumentControllerWithURL(fileURL)
         
         // layout the cell
-        cell!.textLabel?.text = (fileURL.path! as NSString).lastPathComponent
+        cell!.textLabel?.text = fileURL.lastPathComponent
         let iconCount = self.docInteractionController.icons.count
         if iconCount > 0 {
             cell!.imageView?.image = self.docInteractionController.icons[iconCount - 1]
