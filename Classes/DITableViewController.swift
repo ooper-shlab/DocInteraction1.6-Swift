@@ -199,7 +199,7 @@ UIDocumentInteractionControllerDelegate {
         // add a custom gesture recognizer in lieu of using the canned ones
         //
         let longPressGesture =
-        UILongPressGestureRecognizer(target: self, action: "handleLongPress:")
+        UILongPressGestureRecognizer(target: self, action: #selector(DITableViewController.handleLongPress(_:)))
         cell!.imageView?.addGestureRecognizer(longPressGesture)
         cell!.imageView?.userInteractionEnabled = true
         
