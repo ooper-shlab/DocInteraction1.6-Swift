@@ -74,18 +74,18 @@ class DITableViewController: UITableViewController, QLPreviewControllerDataSourc
 UIDocumentInteractionControllerDelegate {
     
     private var docWatcher: DirectoryWatcher!
-    private var documentURLs: [NSURL] = []
+    private var documentURLs: [URL] = []
     private var docInteractionController: UIDocumentInteractionController!
     
     //MARK: -
     
-    private func setupDocumentControllerWithURL(url: NSURL) {
+    private func setupDocumentControllerWithURL(_ url: URL) {
         //checks if docInteractionController has been initialized with the URL
         if self.docInteractionController == nil {
-            self.docInteractionController = UIDocumentInteractionController(URL: url)
+            self.docInteractionController = UIDocumentInteractionController(url: url)
             self.docInteractionController.delegate = self
         } else {
-            self.docInteractionController.URL = url
+            self.docInteractionController.url = url
         }
     }
     
@@ -107,32 +107,32 @@ UIDocumentInteractionControllerDelegate {
     
     // if we installed a custom UIGestureRecognizer (i.e. long-hold), then this would be called
     
-    func handleLongPress(longPressGesture: UILongPressGestureRecognizer) {
-        if longPressGesture.state == .Began {
-            let cellIndexPath = self.tableView.indexPathForRowAtPoint(longPressGesture.locationInView(self.tableView))!
+    func handleLongPress(_ longPressGesture: UILongPressGestureRecognizer) {
+        if longPressGesture.state == .began {
+            let cellIndexPath = self.tableView.indexPathForRow(at: longPressGesture.location(in: self.tableView))!
             
-            var fileURL: NSURL
-            if cellIndexPath.section == 0 {
+            var fileURL: URL
+            if (cellIndexPath as NSIndexPath).section == 0 {
                 // for section 0, we preview the docs built into our app
-                fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[cellIndexPath.row], ofType: nil)!)
+                fileURL = URL(fileURLWithPath: Bundle.main.path(forResource: documents[(cellIndexPath as NSIndexPath).row], ofType: nil)!)
             } else {
                 // for secton 1, we preview the docs found in the Documents folder
-                fileURL = self.documentURLs[cellIndexPath.row]
+                fileURL = self.documentURLs[(cellIndexPath as NSIndexPath).row]
             }
-            self.docInteractionController.URL = fileURL
+            self.docInteractionController.url = fileURL
             
-            self.docInteractionController.presentOptionsMenuFromRect(longPressGesture.view!.frame, inView: longPressGesture.view!, animated: true)
+            self.docInteractionController.presentOptionsMenu(from: longPressGesture.view!.frame, in: longPressGesture.view!, animated: true)
         }
     }
     
     
     //MARK: - UITableViewDataSource
     
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 2
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Initializing each section with a set of rows
         if section  == 0 {
             return documents.count
@@ -141,7 +141,7 @@ UIDocumentInteractionControllerDelegate {
         }
     }
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         var title: String? = nil
         // setting headers for each section
         if section == 0 {
@@ -155,23 +155,23 @@ UIDocumentInteractionControllerDelegate {
         return title
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = "cellID"
-        var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as UITableViewCell?
+        var cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as UITableViewCell?
         
         if cell == nil {
-            cell = UITableViewCell(style: .Subtitle, reuseIdentifier: cellIdentifier)
-            cell!.accessoryType = .DisclosureIndicator
+            cell = UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
+            cell!.accessoryType = .disclosureIndicator
         }
         
-        var fileURL: NSURL
+        var fileURL: URL
         
-        if indexPath.section == 0 {
+        if (indexPath as NSIndexPath).section == 0 {
             // first section is our build-in documents
-            fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[indexPath.row], ofType: nil)!)
+            fileURL = URL(fileURLWithPath: Bundle.main.path(forResource: documents[(indexPath as NSIndexPath).row], ofType: nil)!)
         } else {
             // second section is the contents of the Documents folder
-            fileURL = self.documentURLs[indexPath.row]
+            fileURL = self.documentURLs[(indexPath as NSIndexPath).row]
         }
         self.setupDocumentControllerWithURL(fileURL)
         
@@ -182,13 +182,13 @@ UIDocumentInteractionControllerDelegate {
             cell!.imageView?.image = self.docInteractionController.icons[iconCount - 1]
         }
         
-        let fileURLString = self.docInteractionController.URL!.path!
-        let fileAttributes = try! NSFileManager.defaultManager().attributesOfItemAtPath(fileURLString)
-        let fileSize = (fileAttributes[NSFileSize] as! NSNumber).longLongValue
-        let fileSizeStr = NSByteCountFormatter.stringFromByteCount(fileSize,
-            
-            countStyle: NSByteCountFormatterCountStyle.File)
-        let uti = self.docInteractionController.UTI ?? ""
+        let fileURLString = self.docInteractionController.url!.path
+        let fileAttributes = try! FileManager.default.attributesOfItem(atPath: fileURLString)
+        let fileSize = (fileAttributes[FileAttributeKey.size] as! NSNumber).int64Value
+        let fileSizeStr = ByteCountFormatter.string(fromByteCount: fileSize,
+                                                    
+                                                    countStyle: ByteCountFormatter.CountStyle.file)
+        let uti = self.docInteractionController.uti ?? ""
         cell!.detailTextLabel?.text = "\(fileSizeStr) - \(uti)"
         
         // attach to our view any gesture recognizers that the UIDocumentInteractionController provides
@@ -199,21 +199,21 @@ UIDocumentInteractionControllerDelegate {
         // add a custom gesture recognizer in lieu of using the canned ones
         //
         let longPressGesture =
-        UILongPressGestureRecognizer(target: self, action: #selector(DITableViewController.handleLongPress(_:)))
+            UILongPressGestureRecognizer(target: self, action: #selector(DITableViewController.handleLongPress(_:)))
         cell!.imageView?.addGestureRecognizer(longPressGesture)
-        cell!.imageView?.userInteractionEnabled = true
+        cell!.imageView?.isUserInteractionEnabled = true
         
         return cell!
     }
     
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return kRowHeight
     }
     
     
     //MARK: - UITableViewDelegate
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // three ways to present a preview:
         // 1. Don't implement this method and simply attach the canned gestureRecognizers to the cell
         //
@@ -225,18 +225,18 @@ UIDocumentInteractionControllerDelegate {
         
         // for case 2 use this, allowing UIDocumentInteractionController to handle the preview:
         /*
-        NSURL *fileURL;
-        if (indexPath.section == 0)
-        {
-        fileURL = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:documents[indexPath.row] ofType:nil]];
-        }
-        else
-        {
-        fileURL = [self.documentURLs objectAtIndex:indexPath.row];
-        }
-        [self setupDocumentControllerWithURL:fileURL];
-        [self.docInteractionController presentPreviewAnimated:YES];
-        */
+         NSURL *fileURL;
+         if (indexPath.section == 0)
+         {
+         fileURL = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:documents[indexPath.row] ofType:nil]];
+         }
+         else
+         {
+         fileURL = [self.documentURLs objectAtIndex:indexPath.row];
+         }
+         [self setupDocumentControllerWithURL:fileURL];
+         [self.docInteractionController presentPreviewAnimated:YES];
+         */
         
         // for case 3 we use the QuickLook APIs directly to preview the document -
         let previewController = QLPreviewController()
@@ -244,14 +244,14 @@ UIDocumentInteractionControllerDelegate {
         previewController.delegate = self
         
         // start previewing the document at the current section index
-        previewController.currentPreviewItemIndex = indexPath.row
+        previewController.currentPreviewItemIndex = (indexPath as NSIndexPath).row
         self.navigationController?.pushViewController(previewController, animated: true)
     }
     
     
     //MARK: - UIDocumentInteractionControllerDelegate
     
-    func documentInteractionControllerViewControllerForPreview(controller: UIDocumentInteractionController) -> UIViewController {
+    func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
         return self
     }
     
@@ -259,11 +259,11 @@ UIDocumentInteractionControllerDelegate {
     //MARK: - QLPreviewControllerDataSource
     
     // Returns the number of items that the preview controller should preview
-    func numberOfPreviewItemsInPreviewController(controller: QLPreviewController) -> Int {
+    func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
         var numToPreview = 0
         
         let selectedIndexPath = self.tableView.indexPathForSelectedRow
-        if (selectedIndexPath?.section ?? 0) == 0 {
+        if ((selectedIndexPath as NSIndexPath?)?.section ?? 0) == 0 {
             numToPreview = documents.count
         } else {
             numToPreview = self.documentURLs.count
@@ -272,52 +272,52 @@ UIDocumentInteractionControllerDelegate {
         return numToPreview
     }
     
-    func previewControllerDidDismiss(controller: QLPreviewController) {
+    func previewControllerDidDismiss(_ controller: QLPreviewController) {
         // if the preview dismissed (done button touched), use this method to post-process previews
     }
     
     // returns the item that the preview controller should preview
-    func previewController(controller: QLPreviewController, previewItemAtIndex idx: Int) -> QLPreviewItem {
-        var fileURL: NSURL
+    func previewController(_ controller: QLPreviewController, previewItemAt idx: Int) -> QLPreviewItem {
+        var fileURL: URL
         
         let selectedIndexPath = self.tableView.indexPathForSelectedRow
-        if (selectedIndexPath?.section ?? 0) == 0 {
-            fileURL = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource(documents[idx], ofType: nil)!)
+        if ((selectedIndexPath as NSIndexPath?)?.section ?? 0) == 0 {
+            fileURL = URL(fileURLWithPath: Bundle.main.path(forResource: documents[idx], ofType: nil)!)
         } else {
             fileURL = self.documentURLs[idx]
         }
         
-        return fileURL
+        return fileURL as QLPreviewItem
     }
     
     
     //MARK: - File system support
     
     private var applicationDocumentsDirectory: String {
-        return NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).last! as String
+        return NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String
     }
     
-    func directoryDidChange(folderWatcher: DirectoryWatcher) {
-        self.documentURLs.removeAll(keepCapacity: true)
+    func directoryDidChange(_ folderWatcher: DirectoryWatcher) {
+        self.documentURLs.removeAll(keepingCapacity: true)
         
         let documentsDirectoryPath = self.applicationDocumentsDirectory
         
         let documentsDirectoryContents: [AnyObject]?
         do {
-            documentsDirectoryContents = try NSFileManager.defaultManager().contentsOfDirectoryAtPath(documentsDirectoryPath)
+            documentsDirectoryContents = try FileManager.default.contentsOfDirectory(atPath: documentsDirectoryPath) as [AnyObject]?
         } catch _ {
             documentsDirectoryContents = nil
         }
         
         for curFileName in documentsDirectoryContents! as! [String] {
-            let filePath = (documentsDirectoryPath as NSString).stringByAppendingPathComponent(curFileName)
-            let fileURL = NSURL(fileURLWithPath: filePath)
+            let filePath = (documentsDirectoryPath as NSString).appendingPathComponent(curFileName)
+            let fileURL = URL(fileURLWithPath: filePath)
             
             var isDirectory: ObjCBool = false
-            NSFileManager.defaultManager().fileExistsAtPath(filePath, isDirectory: &isDirectory)
+            FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory)
             
             // proceed to add the document URL to our list (ignore the "Inbox" folder)
-            if !isDirectory && curFileName == "Inbox" {
+            if !isDirectory.boolValue && curFileName == "Inbox" {
                 self.documentURLs.append(fileURL)
             }
         }

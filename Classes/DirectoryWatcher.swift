@@ -60,7 +60,7 @@ import Foundation
 
 @objc(DirectoryWatcherDelegate)
 protocol DirectoryWatcherDelegate: NSObjectProtocol {
-    func directoryDidChange(folderWatcher: DirectoryWatcher)
+    func directoryDidChange(_ folderWatcher: DirectoryWatcher)
 }
 
 @objc(DirectoryWatcher)
@@ -69,7 +69,7 @@ class DirectoryWatcher: NSObject {
     
     private var dirFD: CInt = 0
     
-    private var dirKQRef: dispatch_source_t?
+    private var dirKQRef: DispatchSourceProtocol?
     
     
     //MARK: -
@@ -88,7 +88,7 @@ class DirectoryWatcher: NSObject {
         self.invalidate()
     }
     
-    class func watchFolderWithPath(watchPath: String, delegate watchDelegate: DirectoryWatcherDelegate) -> DirectoryWatcher? {
+    class func watchFolderWithPath(_ watchPath: String, delegate watchDelegate: DirectoryWatcherDelegate) -> DirectoryWatcher? {
         var retVal: DirectoryWatcher? = nil
         let tempManager = DirectoryWatcher()
         tempManager.delegate = watchDelegate
@@ -102,7 +102,7 @@ class DirectoryWatcher: NSObject {
     
     func invalidate() {
         if dirKQRef != nil {
-            dispatch_source_cancel(dirKQRef!)
+            dirKQRef!.cancel()
             dirKQRef = nil
             // We don't need to close the kq, CFFileDescriptorInvalidate closed it instead.
             // Change the value so no one thinks it's still live.
@@ -136,7 +136,7 @@ class DirectoryWatcher: NSObject {
     //    [obj kqueueFired];
     //}
     
-    private func startMonitoringDirectory(dirPath: String) -> Bool {
+    private func startMonitoringDirectory(_ dirPath: String) -> Bool {
         // Double initializing is not going to work...
         if dirKQRef == nil && dirFD == -1 {
             // Open the directory we're going to watch
@@ -144,24 +144,16 @@ class DirectoryWatcher: NSObject {
             if dirFD >= 0 {
                 // Create a kqueue for our event messages...
                 
-                let dispatchSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_VNODE,
-                    UInt(dirFD),
-                    DISPATCH_VNODE_WRITE,
-                    dispatch_get_main_queue())
-                if dispatchSource != nil {
-                    dispatch_source_set_event_handler(dispatchSource, {[weak self] in
-                        self?.kqueueFired()
-                        return
+                let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: dirFD, eventMask: DispatchSource.FileSystemEvent.write, queue: DispatchQueue.main)
+                dispatchSource.setEventHandler(handler: {[weak self] in
+                    self?.kqueueFired()
+                    return
                     })
-                    dispatch_resume(dispatchSource)
-                    dirKQRef = dispatchSource
-                    // If everything worked, return early and bypass shutting things down
-                    return true
-                    // Couldn't create a runloop source, invalidate and release the CFFileDescriptorRef
-                }
-                // file handle is open, but something failed, close the handle...
-                close(dirFD)
-                dirFD = -1
+                dispatchSource.resume()
+                dirKQRef = dispatchSource
+                // If everything worked, return early and bypass shutting things down
+                return true
+                // Couldn't create a runloop source, invalidate and release the CFFileDescriptorRef
             }
         }
         return false
