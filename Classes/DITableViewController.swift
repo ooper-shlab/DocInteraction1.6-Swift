@@ -79,7 +79,7 @@ UIDocumentInteractionControllerDelegate {
     
     //MARK: -
     
-    private func setupDocumentControllerWithURL(_ url: URL) {
+    private func setupDocumentController(with url: URL) {
         //checks if docInteractionController has been initialized with the URL
         if self.docInteractionController == nil {
             self.docInteractionController = UIDocumentInteractionController(url: url)
@@ -93,31 +93,25 @@ UIDocumentInteractionControllerDelegate {
         super.viewDidLoad()
         
         // start monitoring the document directory…
-        self.docWatcher = DirectoryWatcher.watchFolderWithPath(self.applicationDocumentsDirectory, delegate: self)
-        
+        self.docWatcher = DirectoryWatcher.watchFolder(at: self.applicationDocumentsDirectoryURL, delegate: self)
+
         // scan for existing documents
         self.directoryDidChange(self.docWatcher)
     }
     
-    //- (void)viewDidUnload
-    //{
-    //    self.documentURLs = nil;
-    //    self.docWatcher = nil;
-    //}
-    
     // if we installed a custom UIGestureRecognizer (i.e. long-hold), then this would be called
     
-    func handleLongPress(_ longPressGesture: UILongPressGestureRecognizer) {
+    @objc func handleLongPress(_ longPressGesture: UILongPressGestureRecognizer) {
         if longPressGesture.state == .began {
             let cellIndexPath = self.tableView.indexPathForRow(at: longPressGesture.location(in: self.tableView))!
             
             var fileURL: URL
-            if (cellIndexPath as NSIndexPath).section == 0 {
+            if cellIndexPath.section == 0 {
                 // for section 0, we preview the docs built into our app
-                fileURL = URL(fileURLWithPath: Bundle.main.path(forResource: documents[(cellIndexPath as NSIndexPath).row], ofType: nil)!)
+                fileURL = Bundle.main.url(forResource: documents[cellIndexPath.row], withExtension: nil)!
             } else {
                 // for secton 1, we preview the docs found in the Documents folder
-                fileURL = self.documentURLs[(cellIndexPath as NSIndexPath).row]
+                fileURL = self.documentURLs[cellIndexPath.row]
             }
             self.docInteractionController.url = fileURL
             
@@ -157,7 +151,7 @@ UIDocumentInteractionControllerDelegate {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = "cellID"
-        var cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as UITableViewCell?
+        var cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier)
         
         if cell == nil {
             cell = UITableViewCell(style: .subtitle, reuseIdentifier: cellIdentifier)
@@ -166,28 +160,27 @@ UIDocumentInteractionControllerDelegate {
         
         var fileURL: URL
         
-        if (indexPath as NSIndexPath).section == 0 {
+        if indexPath.section == 0 {
             // first section is our build-in documents
-            fileURL = URL(fileURLWithPath: Bundle.main.path(forResource: documents[(indexPath as NSIndexPath).row], ofType: nil)!)
+            fileURL = Bundle.main.url(forResource: documents[indexPath.row], withExtension: nil)!
         } else {
             // second section is the contents of the Documents folder
-            fileURL = self.documentURLs[(indexPath as NSIndexPath).row]
+            fileURL = self.documentURLs[indexPath.row]
         }
-        self.setupDocumentControllerWithURL(fileURL)
+        self.setupDocumentController(with: fileURL)
         
         // layout the cell
         cell!.textLabel?.text = fileURL.lastPathComponent
         let iconCount = self.docInteractionController.icons.count
         if iconCount > 0 {
-            cell!.imageView?.image = self.docInteractionController.icons[iconCount - 1]
+            cell!.imageView?.image = self.docInteractionController.icons.last
         }
         
         let fileURLString = self.docInteractionController.url!.path
         let fileAttributes = try! FileManager.default.attributesOfItem(atPath: fileURLString)
-        let fileSize = (fileAttributes[FileAttributeKey.size] as! NSNumber).int64Value
+        let fileSize = fileAttributes[.size] as! Int64
         let fileSizeStr = ByteCountFormatter.string(fromByteCount: fileSize,
-                                                    
-                                                    countStyle: ByteCountFormatter.CountStyle.file)
+                                                    countStyle: .file)
         let uti = self.docInteractionController.uti ?? ""
         cell!.detailTextLabel?.text = "\(fileSizeStr) - \(uti)"
         
@@ -199,7 +192,7 @@ UIDocumentInteractionControllerDelegate {
         // add a custom gesture recognizer in lieu of using the canned ones
         //
         let longPressGesture =
-            UILongPressGestureRecognizer(target: self, action: #selector(DITableViewController.handleLongPress(_:)))
+            UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
         cell!.imageView?.addGestureRecognizer(longPressGesture)
         cell!.imageView?.isUserInteractionEnabled = true
         
@@ -244,7 +237,7 @@ UIDocumentInteractionControllerDelegate {
         previewController.delegate = self
         
         // start previewing the document at the current section index
-        previewController.currentPreviewItemIndex = (indexPath as NSIndexPath).row
+        previewController.currentPreviewItemIndex = indexPath.row
         self.navigationController?.pushViewController(previewController, animated: true)
     }
     
@@ -263,7 +256,7 @@ UIDocumentInteractionControllerDelegate {
         var numToPreview = 0
         
         let selectedIndexPath = self.tableView.indexPathForSelectedRow
-        if ((selectedIndexPath as NSIndexPath?)?.section ?? 0) == 0 {
+        if (selectedIndexPath?.section ?? 0) == 0 {
             numToPreview = documents.count
         } else {
             numToPreview = self.documentURLs.count
@@ -281,8 +274,8 @@ UIDocumentInteractionControllerDelegate {
         var fileURL: URL
         
         let selectedIndexPath = self.tableView.indexPathForSelectedRow
-        if ((selectedIndexPath as NSIndexPath?)?.section ?? 0) == 0 {
-            fileURL = URL(fileURLWithPath: Bundle.main.path(forResource: documents[idx], ofType: nil)!)
+        if (selectedIndexPath?.section ?? 0) == 0 {
+            fileURL = Bundle.main.url(forResource: documents[idx], withExtension: nil)!
         } else {
             fileURL = self.documentURLs[idx]
         }
@@ -293,26 +286,21 @@ UIDocumentInteractionControllerDelegate {
     
     //MARK: - File system support
     
-    private var applicationDocumentsDirectory: String {
-        return NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String
+    private var applicationDocumentsDirectoryURL: URL {
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
     }
-    
+
     func directoryDidChange(_ folderWatcher: DirectoryWatcher) {
         self.documentURLs.removeAll(keepingCapacity: true)
         
-        let documentsDirectoryPath = self.applicationDocumentsDirectory
+        let documentsDirectoryURL = self.applicationDocumentsDirectoryURL
+
+        let documentsDirectoryContentURLs = try? FileManager.default.contentsOfDirectory(at: documentsDirectoryURL, includingPropertiesForKeys: nil)
+
+        for fileURL in documentsDirectoryContentURLs ?? [] {
+            let filePath = fileURL.path
+            let curFileName = fileURL.lastPathComponent
         
-        let documentsDirectoryContents: [AnyObject]?
-        do {
-            documentsDirectoryContents = try FileManager.default.contentsOfDirectory(atPath: documentsDirectoryPath) as [AnyObject]?
-        } catch _ {
-            documentsDirectoryContents = nil
-        }
-        
-        for curFileName in documentsDirectoryContents! as! [String] {
-            let filePath = (documentsDirectoryPath as NSString).appendingPathComponent(curFileName)
-            let fileURL = URL(fileURLWithPath: filePath)
-            
             var isDirectory: ObjCBool = false
             FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory)
             

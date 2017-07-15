@@ -88,11 +88,11 @@ class DirectoryWatcher: NSObject {
         self.invalidate()
     }
     
-    class func watchFolderWithPath(_ watchPath: String, delegate watchDelegate: DirectoryWatcherDelegate) -> DirectoryWatcher? {
+    class func watchFolder(at watchURL: URL, delegate watchDelegate: DirectoryWatcherDelegate) -> DirectoryWatcher? {
         var retVal: DirectoryWatcher? = nil
         let tempManager = DirectoryWatcher()
         tempManager.delegate = watchDelegate
-        if tempManager.startMonitoringDirectory(watchPath) {
+        if tempManager.startMonitoringDirectory(at: watchURL) {
             // Everything appears to be in order, so return the DirectoryWatcher.
             // Otherwise we'll fall through and return NULL.
             retVal = tempManager
@@ -124,31 +124,22 @@ class DirectoryWatcher: NSObject {
         
     }
     
-    //static void KQCallback(CFFileDescriptorRef kqRef, CFOptionFlags callBackTypes, void *info)
-    //{
-    //    DirectoryWatcher *obj;
-    //
-    //    obj = (__bridge DirectoryWatcher *)info;
-    //    assert([obj isKindOfClass:[DirectoryWatcher class]]);
-    //    assert(kqRef == obj->dirKQRef);
-    //    assert(callBackTypes == kCFFileDescriptorReadCallBack);
-    //
-    //    [obj kqueueFired];
-    //}
-    
-    private func startMonitoringDirectory(_ dirPath: String) -> Bool {
+    private func startMonitoringDirectory(at dirURL: URL) -> Bool {
         // Double initializing is not going to work...
         if dirKQRef == nil && dirFD == -1 {
             // Open the directory we're going to watch
-            dirFD = open((dirPath as NSString).fileSystemRepresentation, O_EVTONLY)
+            //### Always use low-level file APIs with FileSystemRepresentation
+            dirFD = dirURL.withUnsafeFileSystemRepresentation {fsPath in
+                open(fsPath!, O_EVTONLY)
+            }
             if dirFD >= 0 {
                 // Create a kqueue for our event messages...
                 
-                let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: dirFD, eventMask: DispatchSource.FileSystemEvent.write, queue: DispatchQueue.main)
+                let dispatchSource = DispatchSource.makeFileSystemObjectSource(fileDescriptor: dirFD, eventMask: .write, queue: .main)
                 dispatchSource.setEventHandler(handler: {[weak self] in
                     self?.kqueueFired()
                     return
-                    })
+                })
                 dispatchSource.resume()
                 dirKQRef = dispatchSource
                 // If everything worked, return early and bypass shutting things down
