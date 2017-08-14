@@ -305,7 +305,7 @@ UIDocumentInteractionControllerDelegate {
             FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory)
             
             // proceed to add the document URL to our list (ignore the "Inbox" folder)
-            if !isDirectory.boolValue && curFileName == "Inbox" {
+            if !(isDirectory.boolValue && curFileName == "Inbox") {
                 self.documentURLs.append(fileURL)
             }
         }
