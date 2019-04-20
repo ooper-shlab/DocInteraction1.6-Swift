@@ -185,8 +185,8 @@ UIDocumentInteractionControllerDelegate {
         cell!.detailTextLabel?.text = "\(fileSizeStr) - \(uti)"
         
         // attach to our view any gesture recognizers that the UIDocumentInteractionController provides
-        //cell.imageView.userInteractionEnabled = YES;
-        //cell.contentView.gestureRecognizers = self.docInteractionController.gestureRecognizers;
+        //cell!.imageView?.isUserInteractionEnabled = true
+        //cell!.contentView.gestureRecognizers = self.docInteractionController.gestureRecognizers
         //
         // or
         // add a custom gesture recognizer in lieu of using the canned ones
@@ -218,17 +218,18 @@ UIDocumentInteractionControllerDelegate {
         
         // for case 2 use this, allowing UIDocumentInteractionController to handle the preview:
         /*
-         NSURL *fileURL;
-         if (indexPath.section == 0)
-         {
-         fileURL = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:documents[indexPath.row] ofType:nil]];
+         let fileURL: URL
+         if indexPath.section == 0 {
+            fileURL = Bundle.main.url(forResource: documents[indexPath.row], withExtension: nil)!
+         } else {
+            fileURL = self.documentURLs[indexPath.row]
          }
-         else
-         {
-         fileURL = [self.documentURLs objectAtIndex:indexPath.row];
+         self.setupDocumentController(with: fileURL)
+         if !self.docInteractionController.presentPreview(animated: true) {
+            let alert = UIAlertController(title: nil, message: "Preview not available", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+            self.present(alert, animated: true, completion: nil)
          }
-         [self setupDocumentControllerWithURL:fileURL];
-         [self.docInteractionController presentPreviewAnimated:YES];
          */
         
         // for case 3 we use the QuickLook APIs directly to preview the document -
@@ -239,6 +240,7 @@ UIDocumentInteractionControllerDelegate {
         // start previewing the document at the current section index
         previewController.currentPreviewItemIndex = indexPath.row
         self.navigationController?.pushViewController(previewController, animated: true)
+ 
     }
     
     
@@ -287,7 +289,27 @@ UIDocumentInteractionControllerDelegate {
     //MARK: - File system support
     
     private var applicationDocumentsDirectoryURL: URL {
-        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
+        let resultURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
+        let folderURL = resultURL.appendingPathComponent("Test", isDirectory: true)
+        var isDirectory: ObjCBool = false
+        if !FileManager.default.fileExists(atPath: folderURL.path, isDirectory: &isDirectory) {
+            do {
+                try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: false)
+                print("Created directory Test")
+            } catch {
+                print(error)
+            }
+        } else if isDirectory.boolValue {
+            let fileURL = folderURL.appendingPathComponent("test.txt")
+            if !FileManager.default.fileExists(atPath: fileURL.path) {
+                if FileManager.default.createFile(atPath: fileURL.path, contents: Data()) {
+                    print("Created file test.txt")
+                } else {
+                    print("Failed to create file test.txt")
+                }
+            }
+        }
+        return resultURL
     }
 
     func directoryDidChange(_ folderWatcher: DirectoryWatcher) {
